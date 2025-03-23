@@ -1,0 +1,66 @@
+{% extends 'tree/base.html' %}
+
+{% block title %}{{ person.last_name }} {{ person.first_name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        {% if person.photo %}
+        <img src="{{ person.photo.url }}" class="img-fluid rounded" alt="{{ person }}">
+        {% endif %}
+    </div>
+    <div class="col-md-8">
+        <h1>{{ person.last_name }} {{ person.first_name }}</h1>
+        {% if person.middle_name %}
+        <p class="lead">{{ person.middle_name }}</p>
+        {% endif %}
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Основная информация</h5>
+                <p><strong>Дата рождения:</strong> {{ person.date_of_birth|date:"d.m.Y" }}</p>
+                {% if person.place_of_birth %}
+                <p><strong>Место рождения:</strong> {{ person.place_of_birth }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if person.biography %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Биография</h5>
+                <p class="card-text">{{ person.biography|linebreaks }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Семья</h5>
+                {% if person.parents.all %}
+                <h6>Родители:</h6>
+                <ul>
+                    {% for parent in person.parents.all %}
+                    <li><a href="{% url 'person_detail' parent.pk %}">{{ parent }}</a></li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+
+                {% if person.children.all %}
+                <h6>Дети:</h6>
+                <ul>
+                    {% for child in person.children.all %}
+                    <li><a href="{% url 'person_detail' child.pk %}">{{ child }}</a></li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <a href="{% url 'person_edit' person.pk %}" class="btn btn-primary">Редактировать</a>
+            <a href="{% url 'person_list' %}" class="btn btn-secondary">Назад к списку</a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

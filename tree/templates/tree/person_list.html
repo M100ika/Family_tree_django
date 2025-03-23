@@ -1,0 +1,50 @@
+{% extends 'tree/base.html' %}
+
+{% block title %}Список людей{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1>Список людей</h1>
+        <form method="get" class="mb-4">
+            <div class="input-group">
+                <input type="text" name="q" class="form-control" placeholder="Поиск по имени или фамилии" value="{{ request.GET.q }}">
+                <button class="btn btn-primary" type="submit">Поиск</button>
+            </div>
+        </form>
+    </div>
+    <div class="col-auto">
+        <a href="{% url 'person_create' %}" class="btn btn-success">Добавить человека</a>
+    </div>
+</div>
+
+<div class="row">
+    {% for person in persons %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            {% if person.photo %}
+            <img src="{{ person.photo.url }}" class="card-img-top" alt="{{ person }}" style="height: 200px; object-fit: cover;">
+            {% else %}
+            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                <span class="text-muted">Нет фото</span>
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ person.last_name }} {{ person.first_name }}</h5>
+                {% if person.middle_name %}
+                <p class="card-text">{{ person.middle_name }}</p>
+                {% endif %}
+                <p class="card-text">
+                    <small class="text-muted">Дата рождения: {{ person.date_of_birth|date:"d.m.Y" }}</small>
+                </p>
+                <a href="{% url 'person_detail' person.pk %}" class="btn btn-primary">Подробнее</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col">
+        <p>Люди не найдены.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %} 
