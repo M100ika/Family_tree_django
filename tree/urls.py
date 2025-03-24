@@ -12,6 +12,7 @@ urlpatterns = [
     path('person/<int:pk>/edit/', views.PersonUpdateView.as_view(), name='person_edit'),
     path('tree/', views.TreeView.as_view(), name='tree_view'),
     path('api/', include(router.urls)),
+    path('api/csrf-token/', views.get_csrf_token, name='csrf-token'),
     path('api/persons/', views.PersonAPIViewSet.as_view({'get': 'list', 'post': 'create'}), name='person-list'),
     path('api/persons/<int:pk>/', views.PersonAPIViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='person-detail'),
     path('api/persons/<int:pk>/update_relations/', views.PersonAPIViewSet.as_view({'post': 'update_relations'}), name='person-update-relations'),

@@ -26,6 +26,7 @@ class Person(models.Model):
     occupation = models.CharField('Род занятий', max_length=200, blank=True)
     education = models.TextField('Образование', blank=True)
     parents = models.ManyToManyField('self', related_name='children', symmetrical=False, blank=True)
+    spouse = models.OneToOneField('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='partner')
     created_at = models.DateTimeField('Дата создания', auto_now_add=True)
     updated_at = models.DateTimeField('Дата обновления', auto_now=True)
 

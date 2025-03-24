@@ -5,13 +5,15 @@ from django.urls import reverse_lazy
 from .models import Person
 from .forms import PersonForm
 from rest_framework import viewsets, status
-from .serializers import PersonSerializer
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.core.exceptions import ValidationError
 import logging
+from django.middleware.csrf import get_token
+from django.http import JsonResponse
+from .serializers import PersonSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +60,7 @@ class PersonAPIViewSet(viewsets.ModelViewSet):
             person = self.get_object()
             parents = request.data.get('parents', [])
             children = request.data.get('children', [])
+            spouse = request.data.get('spouse')
 
             # Проверяем существование родителей и детей
             existing_parents = Person.objects.filter(id__in=parents)
@@ -77,13 +80,33 @@ class PersonAPIViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
+            # Проверяем существование супруга
+            if spouse:
+                try:
+                    existing_spouse = Person.objects.get(id=spouse)
+                    # Проверяем, не является ли супруг самим человеком
+                    if existing_spouse.id == person.id:
+                        return Response(
+                            {'detail': 'Человек не может быть супругом самому себе'},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                except Person.DoesNotExist:
+                    return Response(
+                        {'detail': f'Супруг с ID {spouse} не найден'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            else:
+                existing_spouse = None
+
             # Очищаем существующие связи
             person.parents.clear()
             person.children.clear()
+            person.spouse = None
 
             # Устанавливаем новые связи
             person.parents.set(existing_parents)
             person.children.set(existing_children)
+            person.spouse = existing_spouse
 
             serializer = self.get_serializer(person)
             return Response(serializer.data)
@@ -143,4 +166,8 @@ class TreeView(ListView):
     context_object_name = 'persons'
 
 def tree_view(request):
-    return render(request, 'tree/tree.html') 
+    return render(request, 'tree/tree.html')
+
+@api_view(['GET'])
+def get_csrf_token(request):
+    return JsonResponse({'csrfToken': get_token(request)}) 

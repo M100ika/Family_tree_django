@@ -5,6 +5,7 @@ from datetime import datetime
 class PersonSerializer(serializers.ModelSerializer):
     parents = serializers.SerializerMethodField()
     children = serializers.SerializerMethodField()
+    spouse = serializers.SerializerMethodField()
 
     class Meta:
         model = Person
@@ -18,6 +19,11 @@ class PersonSerializer(serializers.ModelSerializer):
     def get_children(self, obj):
         return [{'id': child.id, 'first_name': child.first_name, 'last_name': child.last_name} 
                 for child in obj.children.all()]
+
+    def get_spouse(self, obj):
+        if obj.spouse:
+            return {'id': obj.spouse.id, 'first_name': obj.spouse.first_name, 'last_name': obj.spouse.last_name}
+        return None
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
